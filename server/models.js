@@ -5,54 +5,75 @@ const { Model } = Sequelize;
 module.exports = (sequelize) => {
   class Album extends Model {}
   Album.init({
-    showId: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    showName: Sequelize.TEXT,
-    openingDate: Sequelize.DATE,
+    name: Sequelize.TEXT,
+    sortName: Sequelize.TEXT,
+    releaseYear: Sequelize.INTEGER,
   }, { sequelize, modelName: 'album' });
+
   class Track extends Model {}
   Track.init({
-    trackId: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    trackName: {
+    name: {
       type: Sequelize.TEXT,
       allowNull: false,
     },
+    sortName: Sequelize.TEXT,
+    trackNumber: Sequelize.INTEGER,
+    discNumber: Sequelize.INTEGER,
+    length: Sequelize.INTEGER,
   }, { sequelize, modelName: 'track' });
+  Album.hasMany(Track);
+
   class Person extends Model {}
   Person.init({
-    personId: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    personName: {
+    name: {
       type: Sequelize.TEXT,
       allowNull: false,
     },
   }, { sequelize, modelName: 'person' });
-  class Tag extends Model {}
-  Tag.init({
-    tagId: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    tagName: {
+
+  class Role extends Model {}
+  Role.init({
+    name: {
       type: Sequelize.TEXT,
       allowNull: false,
     },
-    tagType: Sequelize.INTEGER,
+  }, { sequelize, modelName: 'role' });
+
+  class AlbumPerson extends Model {}
+  AlbumPerson.init({}, { sequelize, modelName: 'albumPerson' });
+  AlbumPerson.belongsTo(Role);
+  Person.belongsToMany(Album, { through: AlbumPerson });
+
+  class TrackPerson extends Model {}
+  TrackPerson.init({}, { sequelize, modelName: 'trackPerson' });
+  TrackPerson.belongsTo(Role);
+  Person.belongsToMany(Track, { through: TrackPerson });
+
+  class Tag extends Model {}
+  Tag.init({
+    name: {
+      type: Sequelize.TEXT,
+      allowNull: false,
+    },
+    type: Sequelize.INTEGER,
   }, { sequelize, modelName: 'tag' });
+
+  class TagType extends Model {}
+  TagType.init({
+    name: {
+      type: Sequelize.TEXT,
+      allowNull: false,
+    },
+  }, { sequelize, modelName: 'tagType' });
+
+  Tag.belongsToMany(Album, { through: 'albumTag' });
+  Tag.belongsToMany(Track, { through: 'trackTag' });
+  Tag.belongsTo(TagType);
+
   return {
     Album,
     Track,
     Person,
+    Tag,
   };
 };
