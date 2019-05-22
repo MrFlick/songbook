@@ -8,7 +8,6 @@ app.set('views', './server/views');
 app.set('view engine', 'pug');
 
 const sequelize = new Sequelize('sqlite:db/data.sqlite3', {
-  logging: false,
   define: {
     timestamps: false,
   },
