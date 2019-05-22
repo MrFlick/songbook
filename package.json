@@ -1,0 +1,23 @@
+{
+  "name": "songbook",
+  "version": "0.0.1",
+  "description": "Annotated song tracker",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matthew Flickinger",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.0",
+    "sequelize": "^5.8.6",
+    "sqlite3": "^4.0.8"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-vue": "^5.2.2"
+  }
+}
