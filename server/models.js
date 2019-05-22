@@ -43,11 +43,13 @@ module.exports = (sequelize) => {
   AlbumPerson.init({}, { sequelize, modelName: 'albumPerson' });
   AlbumPerson.belongsTo(Role);
   Person.belongsToMany(Album, { through: AlbumPerson });
+  Album.belongsToMany(Person, { through: AlbumPerson });
 
   class TrackPerson extends Model {}
   TrackPerson.init({}, { sequelize, modelName: 'trackPerson' });
   TrackPerson.belongsTo(Role);
   Person.belongsToMany(Track, { through: TrackPerson });
+  Track.belongsToMany(Person, { through: TrackPerson });
 
   class Tag extends Model {}
   Tag.init({
@@ -67,7 +69,9 @@ module.exports = (sequelize) => {
   }, { sequelize, modelName: 'tagType' });
 
   Tag.belongsToMany(Album, { through: 'albumTag' });
+  Album.belongsToMany(Tag, { through: 'albumTag' });
   Tag.belongsToMany(Track, { through: 'trackTag' });
+  Track.belongsToMany(Tag, { through: 'trackTag' });
   Tag.belongsTo(TagType);
 
   return {

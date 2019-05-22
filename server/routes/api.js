@@ -12,6 +12,48 @@ function getRouter(sequelize) {
     res.send('hello');
   });
 
+  router.get('/albums', (req, res) => {
+    models.Album.findAll().then((albums) => {
+      res.json(albums);
+    });
+  });
+
+  router.get('/album/:aid', (req, res) => {
+    models.Album.findByPk(req.params.aid, {
+      include: [{
+        model: models.Track,
+        include: [models.Person, models.Tag],
+      }, models.Tag, models.Person],
+    }).then((album) => {
+      res.json(album);
+    });
+  });
+
+  router.get('/people', (req, res) => {
+    models.Person.findAll().then((albums) => {
+      res.json(albums);
+    });
+  });
+
+  router.get('/person/:pid/tracks', (req, res) => {
+    models.Album.findAll({
+      where: { '$tracks->people->trackPerson.personId$': req.params.pid },
+      include: { model: models.Track, include: models.Person },
+    }).then((albums) => {
+      res.json(albums);
+    });
+  });
+
+  router.get('/tags/', (req, res) => {
+    models.Tag.findAll().then((albums) => {
+      res.json(albums);
+    });
+  });
+
+  router.get('*', () => {
+    throw new Error('Unrecognized API Endpoint');
+  });
+
   // API Error Handler
   // eslint-disable-next-line consistent-return
   router.use((err, req, res, next) => {
