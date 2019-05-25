@@ -6,6 +6,11 @@ const router = express.Router();
 function getRouter(sequelize) {
   const models = modelSource(sequelize);
 
+  function coalescecols(...args) {
+    const cols = args.map(x => sequelize.col(x));
+    return sequelize.fn('COALESCE', ...cols);
+  }
+
   router.use(express.json());
 
   router.get('/', (req, res) => {
@@ -13,7 +18,9 @@ function getRouter(sequelize) {
   });
 
   router.get('/albums', (req, res) => {
-    models.Album.findAll().then((albums) => {
+    models.Album.findAll({
+      order: [coalescecols('sortName', 'name')],
+    }).then((albums) => {
       res.json(albums);
     });
   });
@@ -22,6 +29,7 @@ function getRouter(sequelize) {
     models.Album.findByPk(req.params.aid, {
       include: [{
         model: models.Track,
+        order: ['discNumber', 'trackNumber'],
         include: [models.Person, models.Tag],
       }, models.Tag, models.Person],
     }).then((album) => {
