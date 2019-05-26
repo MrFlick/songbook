@@ -1,32 +1,12 @@
 <template>
   <div>
-    <album-list :albums="albums"></album-list>
+    Welcome to Songbook
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import AlbumList from './components/AlbumList.vue';
 
-export default { 
-  data ()  {
-    return { 
-      albums: [],
-    }
-  },
-  components: {
-    AlbumList,
-  },
-  created() {
-    this.fetchData();
-  },
-  methods: {
-    fetchData() {
-      fetch('./api/albums').then((resp) => {
-        return resp.json();
-      }).then((resp) => {
-        this.albums = resp;
-      });
-    },
-  },
-};
+
+export default { };
 </script>
