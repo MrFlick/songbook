@@ -1,17 +1,20 @@
 <template>
   <div>
-    <ul>
-      <li v-for="a in albums" v-bind:key="a.albumId">{{a.name}}</li>
-    </ul>
+    <album-list :albums="albums"></album-list>
   </div>
 </template>
 
 <script>
+import AlbumList from './components/AlbumList.vue';
+
 export default { 
   data ()  {
     return { 
       albums: [],
     }
+  },
+  components: {
+    AlbumList,
   },
   created() {
     this.fetchData();
