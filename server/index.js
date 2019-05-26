@@ -23,6 +23,7 @@ const sequelize = new Sequelize('sqlite:db/data.sqlite3', {
 });
 
 app.use('/s', express.static('./static'));
+app.use('/v', express.static('./vue-build'));
 
 const api = require('./routes/api')(sequelize);
 const user = require('./routes/user');

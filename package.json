@@ -6,14 +6,19 @@
   "scripts": {
     "run": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config ./webpack.config.dev.js"
   },
   "author": "Matthew Flickinger",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.0",
     "sequelize": "^5.8.6",
-    "sqlite3": "^4.0.8"
+    "sqlite3": "^4.0.8",
+    "vue-loader": "^15.7.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
