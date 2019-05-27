@@ -4,7 +4,7 @@
     <router-link to="/albums">Back to All Albums</router-link>
     <div class="ui unstackable divided items">
       <div class="item" v-for="t in album.tracks" v-bind:key="t.Id">
-        <img class="ui icon mini image" src="/s/images/baseline-music_note-24px.svg">
+        <img class="ui icon" width="50px" src="/s/images/baseline-music_note-24px.svg">
         <div class="content">
           <span class="header">{{t.name}}</span>
           <div class="description"><div class="ui image label" v-for="p in t.people" v-bind:key="p.Id">
@@ -29,9 +29,12 @@ export default {
   created() {
     this.fetchData();
   },
+  watch: {
+    '$route': "fetchData",
+  },
   methods: {
     fetchData() {
-      fetch(`./api/album/${this.$route.params.id}`).then((resp) => {
+      fetch(`/api/album/${this.$route.params.id}`).then((resp) => {
         return resp.json();
       }).then((resp) => {
         this.album = resp;

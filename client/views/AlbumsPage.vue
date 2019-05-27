@@ -19,9 +19,12 @@ export default {
   created() {
     this.fetchData();
   },
+  watch: {
+    '$route': "fetchData",
+  },
   methods: {
     fetchData() {
-      fetch('./api/albums').then((resp) => {
+      fetch('/api/albums').then((resp) => {
         return resp.json();
       }).then((resp) => {
         this.albums = resp;

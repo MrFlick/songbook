@@ -3,6 +3,7 @@ import AlbumPage from './views/AlbumPage.vue';
 import AlbumsPage from './views/AlbumsPage.vue';
 
 const router = new VueRouter({
+  mode: 'history',
   routes: [
     { path: '/album/:id', component: AlbumPage },
     { path: '*', component: AlbumsPage }
