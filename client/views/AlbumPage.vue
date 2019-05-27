@@ -7,7 +7,7 @@
         <img class="ui icon" width="50px" src="/s/images/baseline-music_note-24px.svg">
         <div class="content">
           <span class="header">{{t.name}}</span>
-          <div class="description"><div class="ui image label" v-for="p in t.people" v-bind:key="p.Id">
+          <div class="description"><div class="ui label" v-for="p in t.people" v-bind:key="p.Id">
               {{ p.name }}
           </div></div>
           <div class="description">{{formatTime(t.length)}}</div>
