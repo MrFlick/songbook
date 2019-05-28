@@ -239,7 +239,7 @@ export default {
       return result;
     },
     fetchData() {
-      fetch('/api/people').then((resp) => {
+      fetch('/api/tags').then((resp) => {
         return resp.json();
       }).then((resp) => {
         this.suggestions = resp;
