@@ -40,6 +40,10 @@ export default {
     updateAlbumTags(delta) {
       fetch(`/api/album/${this.albumId}/tags`, {
         method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(delta)
       })
       .then(resp => resp.json())
