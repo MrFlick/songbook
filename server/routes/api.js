@@ -37,6 +37,37 @@ function getRouter(sequelize) {
     });
   });
 
+  router.post('/album/:aid/tags', (req, res) => {
+    const newList = req.body.new;
+    const addList = req.body.add;
+    sequelize.transaction().then((t) => {
+      models.Album.findByPk(req.params.aid, { transaction: t }).then((album) => {
+        Promise.resolve().then(() => {
+          if (newList) {
+            return Promise.all(
+              newList.map(x => models.Tag.create(x, { transaction: t })),
+            );
+          }
+          return [];
+        }).then((news) => {
+          if (addList) {
+            return Promise.all(
+              addList.map(x => models.Tag.findByPk(x.id, { transaction: t })),
+            ).then(adds => news.concat(adds));
+          }
+          return news;
+        }).then((tags) => {
+          if (tags) {
+            return album.addTags(tags, { transaction: t });
+          }
+          return [];
+        })
+          .then(() => album.getTags({ transaction: t }))
+          .then((x) => { res.json(x); t.commit(); });
+      });
+    });
+  });
+
   router.get('/people', (req, res) => {
     models.Person.findAll().then((albums) => {
       res.json(albums);
