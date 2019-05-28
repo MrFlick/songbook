@@ -10,7 +10,10 @@
     "build": "webpack --mode development"
   },
   "nodemonConfig": {
-    "ignore": ["client/*", "vue-build/*"]
+    "ignore": [
+      "client/*",
+      "vue-build/*"
+    ]
   },
   "author": "Matthew Flickinger",
   "license": "ISC",

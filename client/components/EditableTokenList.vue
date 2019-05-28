@@ -42,8 +42,8 @@ input {
 </style>
 
 <template>
-  <div>
-    <div class="ui label" v-for="(item, index) in itemState" v-bind:key="item.key">
+  <div style="border: 1px solid #666; padding: 3px;">
+    Tags: <div class="ui label" v-for="(item, index) in itemState" v-bind:key="item.key">
       {{ item.value.name }}
       <i v-show="isEditing" @click="deleteItem(index)" class="delete icon"></i>
     </div>
@@ -57,12 +57,13 @@ input {
         @keydown.enter.prevent="chooseItem"
         @focus="findSuggestions"
         @blur="hideSuggestions"
+        placeholder="(type or press enter when done)"
         />
       <span ref="textsize" class="hide"></span>
-      <div v-show="itemOptions.length > 0" class="dropdown">
-        <a v-for="(s, index) in itemOptions" href="#"
+      <div v-show="completeOptions.length > 0" class="dropdown">
+        <a v-for="(s, index) in completeOptions" href="#"
         :key="s.id"
-        :class="{active: index==selectedIndex}"
+        :class="{active: index==completeIndex}"
         @click="selectIndex(index)">{{ s.name }}</a>
       </div> 
     </div>
@@ -74,17 +75,23 @@ input {
 </template>
 
 <script>
+const itemStates = {
+  ORIG: 'orig',
+  AUTO: 'auto',
+  NEW: 'new',
+};
+
 export default { 
   name: "token-list",
   props: ['items'],
   data ()  {
     return { 
       itemState: [],
-      itemOptions: [],
+      completeOptions: [],
       newItem: "",
       isEditing: false,
       newId: 0,
-      selectedIndex: -1,
+      completeIndex: -1,
       suggestions: [],
     }
   },
@@ -93,11 +100,8 @@ export default {
   },
   watch: {
     items: function (val) {
-      this.itemState = val.map((v) => ({key: this.newId++, value: v, state: 'orig'}));
+      this.itemState = val.map((v) => ({key: this.newId++, value: v, state: itemStates.ORIG}));
     },
-    itemState: function(val) {
-      console.log(val);
-    }
   },
   methods: {
     userInput() {
@@ -114,7 +118,8 @@ export default {
     },
     resizeInput() {
       // see https://stackoverflow.com/questions/8100770/auto-scaling-inputtype-text-to-width-of-value
-      this.$refs.textsize.textContent = this.newItem;
+      let text = (this.newItem) ? this.newItem : this.$refs.input.placeholder;
+      this.$refs.textsize.textContent = text;
       let offsetWidth = this.$refs.textsize.offsetWidth + 10;
       if (offsetWidth < 50) {
         offsetWidth = 50;
@@ -124,19 +129,19 @@ export default {
     findSuggestions() {
       if (this.newItem) {
         const regex = new RegExp(this.newItem, 'i');
-        this.itemOptions = this.suggestions.filter(x => x.name.match(regex));  
+        this.completeOptions = this.suggestions.filter(x => x.name.match(regex));  
       } else {
-        this.itemOptions = [];
+        this.completeOptions = [];
       }
-      this.selectedIndex = -1;
+      this.completeIndex = -1;
     },
     chooseItem() {
-      if (this.selectedIndex >- 1) {
-        this.addItem(this.itemOptions[this.selectedIndex], "auto");
+      if (this.completeIndex >- 1) {
+        this.addItem(this.completeOptions[this.completeIndex], itemStates.AUTO);
         this.clearSuggestions();
         this.resetInput();
       } else if (this.newItem) {
-        this.addItem({name: this.newItem}, "new");
+        this.addItem({name: this.newItem}, itemStates.NEW);
         this.clearSuggestions();
         this.resetInput();
       } else {
@@ -148,17 +153,17 @@ export default {
       this.newItem = "";
     },
     selectUp() {
-      if (this.selectedIndex > 0) {
-        this.selectedIndex--;
+      if (this.completeIndex > 0) {
+        this.completeIndex--;
       }
     },
     selectDown() {
-      if (this.selectedIndex < this.itemOptions.length -1 ) {
-        this.selectedIndex++;
+      if (this.completeIndex < this.completeOptions.length -1 ) {
+        this.completeIndex++;
       }
     },
     selectIndex(index) {
-      this.selectedIndex = index;
+      this.completeIndex = index;
       this.selectAccept();
     },
     deleteItem(index) {
@@ -166,10 +171,10 @@ export default {
       this.resetInput();
     },
     selectAccept() {
-      if(this.selectedIndex>-1) {
+      if(this.completeIndex>-1) {
         this.chooseItem();
-      } else if (this.itemOptions.length) {
-        this.selectedIndex = 0;
+      } else if (this.completeOptions.length) {
+        this.completeIndex = 0;
         this.chooseItem();
       }
     },
@@ -181,8 +186,8 @@ export default {
       }
     },
     clearSuggestions() {
-      this.selectedIndex = -1;
-      this.itemOptions = [];
+      this.completeIndex = -1;
+      this.completeOptions = [];
     },
     hideSuggestions() {
       setTimeout(() => {
@@ -195,6 +200,43 @@ export default {
     },
     editDone() {
       this.isEditing = false;
+      this.$emit("input", this.getDelta());
+    },
+    getDelta() {
+      const keepList = [];
+      const addList = [];
+      const delList = [];
+      const newList = [];
+      const origKeys = new Map(
+        this.items.map((x,i) => [x.id, {index: i, found:false}])
+      );
+      this.itemState.forEach((item) => {
+        if (item.state !== itemStates.NEW) {
+          let itemId = item.value.id
+          if (origKeys.has(itemId)) {
+            keepList.push(item.value);
+            let ii = origKeys.get(itemId)
+            ii.found = true;
+            origKeys.get(itemId, ii);
+          } else {
+            addList.push(item.value);
+          }
+        } else if (item.state === itemStates.NEW) {
+          newList.push(item.value);
+        }
+      });
+      for (let [id, details] of origKeys) {
+        if( ! details.found ) {
+          delList.push(this.items[details.index]);
+        }
+      };
+      const result = {
+        keep: keepList,
+        add: addList,
+        new: newList,
+        delete: delList,
+      }
+      return result;
     },
     fetchData() {
       fetch('/api/people').then((resp) => {
