@@ -138,6 +138,14 @@ function getRouter(sequelize) {
     });
   });
 
+  router.get('/tag/:tid/', (req, res) => {
+    models.Tag.findByPk(req.params.tid, {
+      include: [models.Album, models.Track],
+    }).then((tag) => {
+      res.json(tag);
+    });
+  });
+
   router.get('*', () => {
     throw new Error('Unrecognized API Endpoint');
   });
