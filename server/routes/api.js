@@ -103,8 +103,20 @@ function getRouter(sequelize) {
   });
 
   router.get('/tags/', (req, res) => {
-    models.Tag.findAll().then((albums) => {
-      res.json(albums);
+    models.Tag.findAll({
+      attributes: {
+        include: [
+          [sequelize.fn('COUNT', sequelize.col('albums->albumTag.albumId')), 'albumCount'],
+          [sequelize.fn('COUNT', sequelize.col('tracks->trackTag.trackId')), 'trackCount'],
+        ],
+      },
+      include: [
+        { model: models.Album, attributes: [] },
+        { model: models.Track, attributes: [] },
+      ],
+      group: ['tag.id'],
+    }).then((tags) => {
+      res.json(tags);
     });
   });
 
