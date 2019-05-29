@@ -37,50 +37,68 @@ function getRouter(sequelize) {
     });
   });
 
+  function addRemoveTags(item, t, newList, addList, delList) {
+    // item should be Album or Track instance
+    return Promise.resolve()
+      .then(() => {
+        if (newList) {
+          return Promise.all(
+            newList.map(x => models.Tag.create(x, { transaction: t })),
+          );
+        }
+        return [];
+      })
+      .then((news) => {
+        if (addList) {
+          return Promise.all(
+            addList.map(x => models.Tag.findByPk(x.id, { transaction: t })),
+          ).then(adds => news.concat(adds));
+        }
+        return news;
+      })
+      .then((tags) => {
+        if (tags) {
+          return item.addTags(tags, { transaction: t });
+        }
+        return [];
+      })
+      .then(() => {
+        if (delList) {
+          return Promise.all(
+            delList.map(x => models.Tag.findByPk(x.id, { transaction: t })),
+          );
+        }
+        return [];
+      })
+      .then((tags) => {
+        if (tags) {
+          return item.removeTags(tags, { transaction: t });
+        }
+        return [];
+      })
+      .then(() => item.getTags({ transaction: t }));
+  }
+
   router.post('/album/:aid/tags', (req, res) => {
     const newList = req.body.new;
     const addList = req.body.add;
     const delList = req.body.delete;
     sequelize.transaction().then((t) => {
       models.Album.findByPk(req.params.aid, { transaction: t }).then((album) => {
-        Promise.resolve()
-          .then(() => {
-            if (newList) {
-              return Promise.all(
-                newList.map(x => models.Tag.create(x, { transaction: t })),
-              );
-            }
-            return [];
-          })
-          .then((news) => {
-            if (addList) {
-              return Promise.all(
-                addList.map(x => models.Tag.findByPk(x.id, { transaction: t })),
-              ).then(adds => news.concat(adds));
-            }
-            return news;
-          })
-          .then((tags) => {
-            if (tags) {
-              return album.addTags(tags, { transaction: t });
-            }
-            return [];
-          })
-          .then(() => {
-            if (delList) {
-              return Promise.all(
-                delList.map(x => models.Tag.findByPk(x.id, { transaction: t })),
-              );
-            }
-            return [];
-          })
-          .then((tags) => {
-            if (tags) {
-              return album.removeTags(tags, { transaction: t });
-            }
-            return [];
-          })
-          .then(() => album.getTags({ transaction: t }))
+        addRemoveTags(album, t, newList, addList, delList)
+          .then((x) => { res.json(x); t.commit(); })
+          .catch((err) => { res.status(500).send(err); t.rollback(); });
+      });
+    });
+  });
+
+  router.post('/track/:tid/tags', (req, res) => {
+    const newList = req.body.new;
+    const addList = req.body.add;
+    const delList = req.body.delete;
+    sequelize.transaction().then((t) => {
+      models.Track.findByPk(req.params.tid, { transaction: t }).then((track) => {
+        addRemoveTags(track, t, newList, addList, delList)
           .then((x) => { res.json(x); t.commit(); })
           .catch((err) => { res.status(500).send(err); t.rollback(); });
       });
