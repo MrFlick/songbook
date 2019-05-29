@@ -55,15 +55,15 @@ input {
         @keydown.tab.prevent="selectAccept"
         @keydown.delete="selectDelete($event)"
         @keydown.enter.prevent="chooseItem"
-        @focus="findSuggestions"
+        @focus="requestSuggestions"
         @blur="hideSuggestions"
         placeholder="(type or press enter when done)"
         />
       <span ref="textsize" class="hide"></span>
-      <div v-show="completeOptions.length > 0" class="dropdown">
-        <a v-for="(s, index) in completeOptions" href="#"
+      <div v-show="suggestions.length > 0" class="dropdown">
+        <a v-for="(s, index) in suggestions" href="#"
         :key="s.id"
-        :class="{active: index==completeIndex}"
+        :class="{active: index==suggestIndex}"
         @click="selectIndex(index)">{{ s.name }}</a>
       </div> 
     </div>
@@ -87,26 +87,25 @@ export default {
   data ()  {
     return { 
       itemState: [],
-      completeOptions: [],
+      suggestions: [],
+      suggestIndex: -1,
       newItem: "",
       isEditing: false,
       newId: 0,
-      completeIndex: -1,
-      suggestions: [],
     }
-  },
-  created () {
-    this.fetchData();
   },
   watch: {
     items: function (val) {
       this.itemState = val.map((v) => ({key: this.newId++, value: v, state: itemStates.ORIG}));
     },
+    suggestions: function(val) {
+      this.suggestIndex = -1;
+    },
   },
   methods: {
     userInput() {
       this.resizeInput();
-      this.findSuggestions();
+      this.requestSuggestions();
     },
     makeEditable() {
       this.isEditing = true;
@@ -126,18 +125,12 @@ export default {
       }
       this.$refs.input.style.width =  offsetWidth + "px";
     },
-    findSuggestions() {
-      if (this.newItem) {
-        const regex = new RegExp(this.newItem, 'i');
-        this.completeOptions = this.suggestions.filter(x => x.name.match(regex));  
-      } else {
-        this.completeOptions = [];
-      }
-      this.completeIndex = -1;
+    requestSuggestions() {
+      this.$emit('suggest', this.newItem, this);
     },
     chooseItem() {
-      if (this.completeIndex >- 1) {
-        this.addItem(this.completeOptions[this.completeIndex], itemStates.AUTO);
+      if (this.suggestIndex >- 1) {
+        this.addItem(this.suggestions[this.suggestIndex], itemStates.AUTO);
         this.clearSuggestions();
         this.resetInput();
       } else if (this.newItem) {
@@ -153,17 +146,17 @@ export default {
       this.newItem = "";
     },
     selectUp() {
-      if (this.completeIndex > 0) {
-        this.completeIndex--;
+      if (this.suggestIndex > 0) {
+        this.suggestIndex--;
       }
     },
     selectDown() {
-      if (this.completeIndex < this.completeOptions.length -1 ) {
-        this.completeIndex++;
+      if (this.suggestIndex < this.suggestions.length -1 ) {
+        this.suggestIndex++;
       }
     },
     selectIndex(index) {
-      this.completeIndex = index;
+      this.suggestIndex = index;
       this.selectAccept();
     },
     deleteItem(index) {
@@ -171,10 +164,10 @@ export default {
       this.resetInput();
     },
     selectAccept() {
-      if(this.completeIndex>-1) {
+      if(this.suggestIndex>-1) {
         this.chooseItem();
-      } else if (this.completeOptions.length) {
-        this.completeIndex = 0;
+      } else if (this.suggestions.length) {
+        this.suggestIndex = 0;
         this.chooseItem();
       }
     },
@@ -186,8 +179,8 @@ export default {
       }
     },
     clearSuggestions() {
-      this.completeIndex = -1;
-      this.completeOptions = [];
+      this.suggestIndex = -1;
+      this.suggestions = [];
     },
     hideSuggestions() {
       setTimeout(() => {
@@ -237,13 +230,6 @@ export default {
         delete: delList,
       }
       return result;
-    },
-    fetchData() {
-      fetch('/api/tags').then((resp) => {
-        return resp.json();
-      }).then((resp) => {
-        this.suggestions = resp;
-      });
     },
   },
 };

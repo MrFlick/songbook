@@ -2,7 +2,10 @@
   <div>
     <router-link to="/albums">Back to All Albums</router-link>
     <h2>{{ album.name }}</h2>
-    <token-list :items="album.tags" @input="updateAlbumTags"/>
+    <token-list
+      :items="album.tags"
+      @suggest = "suggestTag"
+      @input="updateAlbumTags"/>
     <album-track-list :album="album"/>
     <router-link to="/albums">Back to All Albums</router-link>
   </div>
@@ -16,6 +19,7 @@ export default {
   data ()  {
     return { 
       album: {},
+      tags: [],
     }
   },
   components: {
@@ -25,6 +29,7 @@ export default {
   created() {
     this.albumId = this.$route.params.id;
     this.fetchData();
+    this.fetchTagSuggestions();
   },
   watch: {
     '$route': "fetchData",
@@ -36,6 +41,22 @@ export default {
       }).then((resp) => {
         this.album = resp;
       });
+    },
+    fetchTagSuggestions() {
+      fetch('/api/tags').then((resp) => {
+        return resp.json();
+      }).then((resp) => {
+        this.tags = resp;
+      });
+    },
+    suggestTag(value, ref) {
+      if (value) {
+        const regex = new RegExp(value, 'i');
+        ref.suggestions = this.tags.filter(x => x.name.match(regex));
+      } else {
+        ref.suggestions = [];
+      }
+      this.completeIndex = -1;
     },
     updateAlbumTags(delta) {
       fetch(`/api/album/${this.albumId}/tags`, {
