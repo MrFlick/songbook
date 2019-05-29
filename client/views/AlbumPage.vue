@@ -4,9 +4,14 @@
     <h2>{{ album.name }}</h2>
     <token-list
       :items="album.tags"
-      @suggest = "suggestTag"
-      @input="updateAlbumTags"/>
-    <album-track-list :album="album"/>
+      @suggest="suggestTag"
+      @input="updateAlbumTags"
+      />
+    <album-track-list 
+      :album="album" 
+      @trackSuggest="suggestTag"
+      @trackInput="updateTrackTags"
+      @tagClick="tagClick"/>
     <router-link to="/albums">Back to All Albums</router-link>
   </div>
 </template>
@@ -72,6 +77,23 @@ export default {
         this.album.tags = resp;  
       });
     },
+    updateTrackTags(delta, track) {
+      fetch(`/api/track/${track.id}/tags`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(delta)
+      })
+      .then(resp => resp.json())
+      .then((resp) => {
+        track.tags = resp;  
+      });
+    },
+    tagClick(tag) {
+      this.$router.push(`/tag/${tag.id}`);
+    }
   },
 };
 </script>

@@ -42,11 +42,15 @@ input {
 </style>
 
 <template>
-  <div style="border: 1px solid #666; padding: 3px;">
-    Tags: <div class="ui label" v-for="(item, index) in itemState" v-bind:key="item.key">
+  <div>
+    Tags: <a class="ui label" 
+      v-for="(item, index) in itemState" 
+      v-bind:key="item.key" 
+      @click.prevent="tokenClick(item)"
+      href="#">
       {{ item.value.name }}
       <i v-show="isEditing" @click="deleteItem(index)" class="delete icon"></i>
-    </div>
+    </a>
     <div v-if="isEditing" class="holder">
       <input ref="input" v-model="newItem" 
         @input="userInput" 
@@ -95,9 +99,18 @@ export default {
     }
   },
   watch: {
-    items: function (val) {
-      this.itemState = val.map((v) => ({key: this.newId++, value: v, state: itemStates.ORIG}));
-    },
+    items: {
+      immediate: true,
+      handler: function (val) {
+        if(val) {
+          this.itemState = val.map((v) => ({
+            key: this.newId++, 
+            value: v, 
+            state: itemStates.ORIG}));
+        } else {
+          this.itemStates = [];
+        }
+    }},
     suggestions: function(val) {
       this.suggestIndex = -1;
     },
@@ -231,6 +244,11 @@ export default {
       }
       return result;
     },
+    tokenClick(token) {
+      if (!this.isEditing) {
+        this.$emit('tokenClick', token.value);
+      }
+    }
   },
 };
 </script>

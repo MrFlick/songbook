@@ -5,6 +5,13 @@
       <div class="content">
         <span class="header">{{t.name}}</span>
         <div class="description">
+          <token-list
+            :items="t.tags"
+            @suggest = "suggestTrackTag"
+            @input = "inputTrackTags($event, t)"
+            @tokenClick = "tagClick"/>
+        </div>
+        <div class="description">
           <router-link v-for="p in t.people" :to="`/person/${p.id}`"
             v-bind:key="p.Id" class="ui label">
             {{ p.name }}
@@ -17,13 +24,27 @@
 </template>
 
 <script>
+import TokenList from '../components/EditableTokenList.vue';
+
 export default { 
   name: 'album-track-list',
   props: ['album'],
+  components: {
+    TokenList,
+  },
   methods: {
     formatTime(millisecs) {
       const date = new Date(millisecs);
       return date.toISOString().substr(14, 5);
+    },
+    suggestTrackTag(...args) {
+      this.$emit('trackSuggest', ...args);
+    },
+    inputTrackTags(delta, track) {
+      this.$emit('trackInput', delta, track);
+    },
+    tagClick(track) {
+      this.$emit('tagClick', track);
     }
   },
 };
