@@ -22,6 +22,7 @@ module.exports = (sequelize) => {
     length: Sequelize.INTEGER,
   }, { sequelize, modelName: 'track' });
   Album.hasMany(Track);
+  Track.belongsTo(Album);
 
   class Person extends Model {}
   Person.init({
