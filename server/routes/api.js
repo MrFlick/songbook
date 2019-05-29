@@ -5,6 +5,7 @@ const router = express.Router();
 
 function getRouter(sequelize) {
   const models = modelSource(sequelize);
+  const { Op } = models;
 
   function coalescecols(...args) {
     const cols = args.map(x => sequelize.col(x));
@@ -153,6 +154,32 @@ function getRouter(sequelize) {
       } else {
         res.status(404).json({ message: `tag ${req.params.tid} not found` });
       }
+    });
+  });
+
+  router.get('/search/:term', (req, res) => {
+    const { term } = req.params;
+    const likeName = { name: { [Op.like]: `%${term}%` } };
+    const order = ['name'];
+    Promise.all([
+      models.Album.findAll({ where: likeName, order }),
+      models.Track.findAll({ where: likeName, include: models.Album, order }),
+      models.Person.findAll({ where: likeName, order }),
+      models.Tag.findAll({ where: likeName, order }),
+    ]).then((results) => {
+      function mapLinkFn(path) {
+        return function linkfn(x) {
+          const r = x.get({ plain: true });
+          r.link = `/${path}/${r.id}`;
+          return r;
+        };
+      }
+      res.json({
+        albums: results[0].map(mapLinkFn('album')),
+        tracks: results[1].map(mapLinkFn('track')),
+        people: results[2].map(mapLinkFn('person')),
+        tags: results[3].map(mapLinkFn('tag')),
+      });
     });
   });
 

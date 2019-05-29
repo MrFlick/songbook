@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 
 const { Model } = Sequelize;
+const { Op } = Sequelize;
 
 module.exports = (sequelize) => {
   class Album extends Model {}
@@ -80,5 +81,6 @@ module.exports = (sequelize) => {
     Track,
     Person,
     Tag,
+    Op,
   };
 };
