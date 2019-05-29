@@ -140,7 +140,13 @@ function getRouter(sequelize) {
 
   router.get('/tag/:tid/', (req, res) => {
     models.Tag.findByPk(req.params.tid, {
-      include: [models.Album, {model: models.Track, include: models.Album }],
+      include: [
+        { model: models.Album },
+        { model: models.Track, include: models.Album }],
+      order: [
+        [models.Album, 'name'],
+        [models.Track, 'name'],
+      ],
     }).then((tag) => {
       if (tag) {
         res.json(tag);
