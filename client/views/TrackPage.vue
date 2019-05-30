@@ -7,13 +7,25 @@
       :items="track.tags"
       @suggest="suggestTag"
       @input="updateTrackTags"
+      @tokenClick="gotoTag"
       />
     <div class="description">
       Artists: <router-link v-for="p in track.people" :to="`/person/${p.id}`"
         v-bind:key="p.Id" class="ui label">
         {{ p.name }}
       </router-link>
-
+    </div>
+    <div class="description">
+      Lyrics: 
+      <div v-show="!isEditingLyric" >
+        <button class="ui button" @click.prevent="editLyric">Edit lyrics</button>
+        <pre v-if="lyric">{{lyric}}</pre>
+      </div>
+      <div v-show="isEditingLyric" class="ui form">
+        <textarea v-model="lyricValue"></textarea>
+        <button class="ui submit button" @click.prevent="saveLyricEdit">Save</button>
+        <button class="ui button" @click.prevent="cancelLyricEdit">Cancel</button>
+      </div>
     </div>
     <router-link v-if="track.album && track.album.id" :to="`/album/${track.album.id}`">Back to Album</router-link>
   </div>
@@ -21,12 +33,15 @@
 
 <script>
 import TokenList from '../components/EditableTokenList.vue';
+import api from '../utils/api.js';
 
 export default { 
   data ()  {
     return { 
       track: {},
       tags: [],
+      isEditingLyric: false,
+      lyricValue: "",
     }
   },
   components: {
@@ -78,6 +93,27 @@ export default {
         this.track.tags = resp;  
       });
     },
+    gotoTag(tag) {
+      this.$router.push(`/tag/${tag.id}`)
+    },
+    editLyric() {
+      this.lyricValue = this.lyric;
+      this.isEditingLyric = true;
+    },
+    cancelLyricEdit() {
+      this.isEditingLyric = false;
+      this.lyricValue = "";
+    },
+    saveLyricEdit() {
+      this.isEditingLyric = false;
+      api.saveLyrics(this.trackId, this.lyricValue)
+      .then((lyric) => {this.track.lyric = lyric});
+    },
   },
+  computed: {
+    lyric() {
+      return this.track.lyric && this.track.lyric.text || "";
+    }
+  }
 };
 </script>

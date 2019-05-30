@@ -76,9 +76,20 @@ module.exports = (sequelize) => {
   Track.belongsToMany(Tag, { through: 'trackTag' });
   Tag.belongsTo(TagType);
 
+  class Lyric extends Model {}
+  Lyric.init({
+    text: {
+      type: Sequelize.TEXT,
+      allowNull: false,
+    },
+  }, { sequelize, modelName: 'lyric' });
+  Lyric.belongsTo(Track);
+  Track.hasOne(Lyric);
+
   return {
     Album,
     Track,
+    Lyric,
     Person,
     Tag,
     Op,

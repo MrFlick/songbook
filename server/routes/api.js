@@ -44,9 +44,31 @@ function getRouter(sequelize) {
         models.Album,
         models.Person,
         models.Tag,
+        models.Lyric,
       ],
     }).then((track) => {
       res.json(track);
+    });
+  });
+
+  router.post('/track/:tid/lyric', (req, res) => {
+    const newLyric = req.body;
+    sequelize.transaction().then((t) => {
+      models.Track.findByPk(req.params.tid, { transaction: t }).then((track) => {
+        models.Lyric.findOne({ where: { trackId: track.id }, transaction: t })
+          .then((lyric) => {
+            if (lyric) {
+              return lyric.update(newLyric, { transaction: t });
+            }
+            return models.Lyric.create(newLyric, { transaction: t });
+          })
+          .then((lyric) => {
+            return track.setLyric(lyric, { transaction: t })
+              .then(() => lyric);
+          })
+          .then((x) => { res.json(x); t.commit(); })
+          .catch((err) => { res.status(500).send(err); t.rollback(); });
+      });
     });
   });
 
