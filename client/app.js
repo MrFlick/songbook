@@ -4,6 +4,7 @@ import AlbumsPage from './views/AlbumsPage.vue';
 import PersonPage from './views/PersonPage.vue';
 import TagPage from './views/TagPage.vue';
 import TagsPage from './views/TagsPage.vue';
+import TrackPage from './views/TrackPage.vue';
 
 const router = new VueRouter({
   mode: 'history',
@@ -12,6 +13,7 @@ const router = new VueRouter({
     { path: '/person/:id', component: PersonPage },
     { path: '/tag/:id', component: TagPage },
     { path: '/tags', component: TagsPage },
+    { path: '/track/:id', component: TrackPage },
     { path: '*', component: AlbumsPage },
   ],
 });

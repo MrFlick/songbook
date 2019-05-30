@@ -38,6 +38,18 @@ function getRouter(sequelize) {
     });
   });
 
+  router.get('/track/:tid', (req, res) => {
+    models.Track.findByPk(req.params.tid, {
+      include: [
+        models.Album,
+        models.Person,
+        models.Tag,
+      ],
+    }).then((track) => {
+      res.json(track);
+    });
+  });
+
   function addRemoveTags(item, t, newList, addList, delList) {
     // item should be Album or Track instance
     return Promise.resolve()
