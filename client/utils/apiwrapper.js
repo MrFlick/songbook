@@ -28,8 +28,8 @@ function getAlbum(albumId) {
   return getData(`/api/album/${albumId}`);
 }
 
-function getPersonTracks(personId) {
-  return getData(`/api/person/${personId}/tracks`);
+function getPerson(personId) {
+  return getData(`/api/person/${personId}`);
 }
 
 function getTrack(trackId) {
@@ -63,7 +63,7 @@ function updateAlbumTags(albumId, delta) {
 export default {
   getAlbums,
   getAlbum,
-  getPersonTracks,
+  getPerson,
   getTrack,
   saveLyrics,
   getTags,

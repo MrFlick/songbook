@@ -1,11 +1,11 @@
 const express = require('express');
+const { Op } = require('sequelize');
 const modelSource = require('../models');
 
 const router = express.Router();
 
 function getRouter(sequelize) {
   const models = modelSource(sequelize);
-  const { Op } = models;
 
   function coalescecols(...args) {
     const cols = args.map(x => sequelize.col(x));
@@ -146,12 +146,24 @@ function getRouter(sequelize) {
     });
   });
 
-  router.get('/person/:pid/tracks', (req, res) => {
-    models.Album.findAll({
-      where: { '$tracks->people->trackPerson.personId$': req.params.pid },
-      include: { model: models.Track, include: [models.Person, models.Tag] },
-    }).then((albums) => {
-      res.json(albums);
+  router.get('/person/:pid', (req, res) => {
+    const personId = req.params.pid;
+    const personPr = models.Person.findByPk(personId);
+    const personTracks = sequelize.dialect.QueryGenerator.selectQuery('trackPeople', {
+      attributes: ['trackId'],
+      where: { personId },
+    }).slice(0, -1);
+    const albumsPr = models.Album.findAll({
+      include: {
+        model: models.Track,
+        where: { id: { [Op.in]: sequelize.literal(`(${personTracks})`) } },
+        include: [models.Person, models.Tag],
+      },
+    });
+    Promise.all([personPr, albumsPr]).then(([person, albums]) => {
+      const result = person.get({ plain: true });
+      result.albums = albums || [];
+      res.json(result);
     });
   });
 
