@@ -147,7 +147,19 @@ export default {
         this.clearSuggestions();
         this.resetInput();
       } else if (this.newItem) {
-        this.addItem({name: this.newItem}, itemStates.NEW);
+        let found=false;
+        let i = 0;
+        for(; i<this.suggestions.length; i++) {
+          if (this.suggestions[i].name===this.newItem) {
+            found = true;
+            break;
+          }
+        };
+        if (found) {
+          this.addItem(this.suggestions[i], itemStates.AUTO);
+        } else {
+          this.addItem({name: this.newItem}, itemStates.NEW);
+        }
         this.clearSuggestions();
         this.resetInput();
       } else {
