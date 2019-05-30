@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import api from '../utils/apiwrapper.js';
+
 export default { 
   data ()  {
     return { 
@@ -35,13 +37,15 @@ export default {
     this.fetchData();
   },
   watch: {
-    '$route': "fetchData",
+    '$route': function() {
+      this.tagId = this.$route.params.id;
+      this.fetchData();
+    }
   },
   methods: {
     fetchData() {
-      fetch(`/api/tag/${this.tagId}`).then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getTag(this.tagId)
+      .then((resp) => {
         this.tag = resp;
       });
     },

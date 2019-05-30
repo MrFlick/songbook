@@ -6,6 +6,7 @@
       :items="album.tags"
       @suggest="suggestTag"
       @input="updateAlbumTags"
+      @tokenClick="tagClick"
       />
     <album-track-list 
       :album="album" 
@@ -19,6 +20,7 @@
 <script>
 import AlbumTrackList from '../components/AlbumTrackList.vue';
 import TokenList from '../components/EditableTokenList.vue';
+import api from '../utils/apiwrapper.js';
 
 export default { 
   data ()  {
@@ -37,20 +39,21 @@ export default {
     this.fetchTagSuggestions();
   },
   watch: {
-    '$route': "fetchData",
+    '$route': function() {
+      this.albumId = this.$route.params.id;
+      this.fetchData();
+    }
   },
   methods: {
     fetchData() {
-      fetch(`/api/album/${this.albumId}`).then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getAlbum(this.albumId)
+      .then((resp) => {
         this.album = resp;
       });
     },
     fetchTagSuggestions() {
-      fetch('/api/tags').then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getTags()
+      .then((resp) => {
         this.tags = resp;
       });
     },
@@ -64,29 +67,13 @@ export default {
       this.completeIndex = -1;
     },
     updateAlbumTags(delta) {
-      fetch(`/api/album/${this.albumId}/tags`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(delta)
-      })
-      .then(resp => resp.json())
+      api.updateAlbumTags(this.albumId, delta)
       .then((resp) => {
         this.album.tags = resp;  
       });
     },
     updateTrackTags(delta, track) {
-      fetch(`/api/track/${track.id}/tags`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(delta)
-      })
-      .then(resp => resp.json())
+      api.updateTrackTags(track.id, delta)
       .then((resp) => {
         track.tags = resp;  
       });

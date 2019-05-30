@@ -5,7 +5,7 @@
       <div class="content">
         <router-link :to="`/album/${album.id}`" class="header">{{ album.name }}</router-link>
         <div class="description">
-          <album-track-list :album="album"/>
+          <album-track-list :album="album" @tagClick="tagClick"/>
         </div>
       </div>
     </div>
@@ -14,6 +14,7 @@
 
 <script>
 import AlbumTrackList from '../components/AlbumTrackList.vue';
+import api from '../utils/apiwrapper.js';
 
 export default { 
   data ()  {
@@ -32,12 +33,13 @@ export default {
   },
   methods: {
     fetchData() {
-      fetch(`/api/person/${this.$route.params.id}/tracks`).then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getPersonTracks(this.$route.params.id).then((resp) => {
         this.tracks = resp;
       });
     },
+    tagClick(tag) {
+      this.$router.push(`/tag/${tag.id}`);
+    }
   },
 };
 </script>

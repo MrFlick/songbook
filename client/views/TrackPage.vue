@@ -33,7 +33,7 @@
 
 <script>
 import TokenList from '../components/EditableTokenList.vue';
-import api from '../utils/api.js';
+import api from '../utils/apiwrapper.js';
 
 export default { 
   data ()  {
@@ -53,20 +53,20 @@ export default {
     this.fetchTagSuggestions();
   },
   watch: {
-    '$route': "fetchData",
+    '$route': function () {
+      this.trackId = this.$route.params.id;
+      this.fetchData();
+    }
   },
   methods: {
     fetchData() {
-      fetch(`/api/track/${this.trackId}`).then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getTrack(this.trackId)
+      .then((resp) => {
         this.track = resp;
       });
     },
     fetchTagSuggestions() {
-      fetch('/api/tags').then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getTags().then((resp) => {
         this.tags = resp;
       });
     },
@@ -80,15 +80,7 @@ export default {
       this.completeIndex = -1;
     },
     updateTrackTags(delta) {
-      fetch(`/api/track/${this.trackId}/tags`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(delta)
-      })
-      .then(resp => resp.json())
+      api.updateTrackTags(this.trackId, delta)
       .then((resp) => {
         this.track.tags = resp;  
       });

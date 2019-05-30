@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import api from '../utils/apiwrapper.js';
 
 export default { 
   data ()  {
@@ -26,9 +27,8 @@ export default {
   },
   methods: {
     fetchData() {
-      fetch('/api/tags').then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getTags()
+      .then((resp) => {
         this.tags = resp;
       });
     },

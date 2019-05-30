@@ -149,7 +149,7 @@ function getRouter(sequelize) {
   router.get('/person/:pid/tracks', (req, res) => {
     models.Album.findAll({
       where: { '$tracks->people->trackPerson.personId$': req.params.pid },
-      include: { model: models.Track, include: models.Person },
+      include: { model: models.Track, include: [models.Person, models.Tag] },
     }).then((albums) => {
       res.json(albums);
     });

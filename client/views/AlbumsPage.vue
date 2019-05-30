@@ -6,6 +6,7 @@
 
 <script>
 import AlbumList from '../components/AlbumList.vue';
+import api from '../utils/apiwrapper.js';
 
 export default { 
   data ()  {
@@ -24,9 +25,8 @@ export default {
   },
   methods: {
     fetchData() {
-      fetch('/api/albums').then((resp) => {
-        return resp.json();
-      }).then((resp) => {
+      api.getAlbums()
+      .then((resp) => {
         this.albums = resp;
       });
     },
