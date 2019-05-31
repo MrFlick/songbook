@@ -26,7 +26,7 @@ albums %>%
 
 tracks <- dd %>% 
   select(id=`Track ID`, albumId=`Album Id`,
-         name=Name, length=`Total Time`, 
+         name=Name, length=`Total Time`, sortName = `Sort Name`,
          trackNumber = `Track Number`, discNumber=`Disc Number`) 
 
 tracks %>% 

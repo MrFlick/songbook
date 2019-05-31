@@ -72,7 +72,12 @@ export default {
         .concat(resp.people.map(cleanType('person')))
         .concat(resp.tags.map(cleanType('tag')));
       this.selectedIndex = -1;
-      this.results = results.sort((a, b) => (a.name > b.name) ? 1 : -1);
+      results.sort((a, b) => {
+        a = (a.sortName || a.name);
+        b = (b.sortName || b.name);
+        return a.localeCompare(b, undefined, {sensitivity: 'base'});
+      });
+      this.results = results;
     },
     selectUp() {
       if (this.selectedIndex > 0) {
