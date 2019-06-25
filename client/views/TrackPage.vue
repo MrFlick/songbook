@@ -19,7 +19,7 @@
       Lyrics: 
       <div v-show="!isEditingLyric" >
         <button class="ui button" @click.prevent="editLyric">Edit lyrics</button>
-        <pre v-if="lyric">{{lyric}}</pre>
+        <lyrics-display :lyric="lyric"></lyrics-display>
       </div>
       <div v-show="isEditingLyric" class="ui form">
         <textarea v-model="lyricValue"></textarea>
@@ -33,6 +33,7 @@
 
 <script>
 import TokenList from '../components/EditableTokenList.vue';
+import LyricsDisplay from '../components/LyricsDisplay.vue';
 import api from '../utils/apiwrapper.js';
 
 export default { 
@@ -46,6 +47,7 @@ export default {
   },
   components: {
     TokenList,
+    LyricsDisplay,
   },
   created() {
     this.trackId = this.$route.params.id;
