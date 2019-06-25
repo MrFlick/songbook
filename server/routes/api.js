@@ -30,9 +30,9 @@ function getRouter(sequelize) {
     models.Album.findByPk(req.params.aid, {
       include: [{
         model: models.Track,
-        order: ['discNumber', 'trackNumber'],
         include: [models.Person, models.Tag],
       }, models.Tag, models.Person],
+      order: [[models.Track, 'discNumber'], [models.Track, 'trackNumber']],
     }).then((album) => {
       res.json(album);
     });
@@ -159,6 +159,7 @@ function getRouter(sequelize) {
         where: { id: { [Op.in]: sequelize.literal(`(${personTracks})`) } },
         include: [models.Person, models.Tag],
       },
+      order: [[models.Track, 'discNumber'], [models.Track, 'trackNumber']],
     });
     Promise.all([personPr, albumsPr]).then(([person, albums]) => {
       const result = person.get({ plain: true });
@@ -191,8 +192,9 @@ function getRouter(sequelize) {
         { model: models.Album },
         { model: models.Track, include: models.Album }],
       order: [
-        [models.Album, 'name'],
-        [models.Track, 'name'],
+        [coalescecols('albums.sortName', 'albums.name')],
+        [models.Track, 'discNumber'],
+        [models.Track, 'trackNumber'],
       ],
     }).then((tag) => {
       if (tag) {
@@ -206,12 +208,11 @@ function getRouter(sequelize) {
   router.get('/search/:term', (req, res) => {
     const { term } = req.params;
     const likeName = { name: { [Op.like]: `%${term}%` } };
-    const order = ['name'];
     Promise.all([
-      models.Album.findAll({ where: likeName, order }),
-      models.Track.findAll({ where: likeName, include: models.Album, order }),
-      models.Person.findAll({ where: likeName, order }),
-      models.Tag.findAll({ where: likeName, order }),
+      models.Album.findAll({ where: likeName, order: [coalescecols('sortName', 'name')] }),
+      models.Track.findAll({ where: likeName, include: models.Album, order: ['name'] }),
+      models.Person.findAll({ where: likeName, order: ['name'] }),
+      models.Tag.findAll({ where: likeName, order: ['name'] }),
     ]).then((results) => {
       function mapLinkFn(path) {
         return function linkfn(x) {
