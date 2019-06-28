@@ -3,7 +3,7 @@
     <div class="item" v-for="t in album.tracks" v-bind:key="t.Id">
       <img class="ui icon fst" width="50px" src="/s/images/baseline-music_note-24px.svg">
       <div class="content">
-        <span class="header">{{t.name}}</span>
+        <span class="header"><router-link :to="`/track/${t.id}`" class="header">{{t.name}}</router-link></span>
         <div class="description">
           <token-list
             :items="t.tags"
