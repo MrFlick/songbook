@@ -181,6 +181,7 @@ function getRouter(sequelize) {
         { model: models.Track, attributes: [] },
       ],
       group: ['tag.id'],
+      order: ['name'],
     }).then((tags) => {
       res.json(tags);
     });
